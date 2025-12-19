@@ -6,7 +6,7 @@
     "distDir": "../build"
   },
   "package": {
-    "productName": "Fabulously Optimized Installer",
+    "productName": "OptiFine for Fabric Installer",
     "version": "1.0.2"
   },
   "tauri": {
@@ -22,7 +22,7 @@
         "confirm": true
       },
       "shell": {
-        "open": "^https://wiki.download.fo/"
+        "open": "^https://modrinth.com/modpack/optifine-for-fabric/"
       }
     },
     "bundle": {
@@ -70,7 +70,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "Fabulously Optimized Installer",
+        "title": "OptiFine for Fabric Installer",
         "width": 600,
         "height": 300,
         "minWidth": 224,

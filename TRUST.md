@@ -12,7 +12,7 @@
 
 # Trust & Security
 
-- Modpack bundle is built from [source](https://github.com/Fabulously-Optimized/fabulously-optimized) and signed by Github Actions using cosign
+- Modpack bundle is downloaded from [Modrinth](https://modrinth.com/modpack/optifine-for-fabric) and may include signature verification if available
 - Source and modpack bundle includes hashes for all their required external files
 - Backend restricts download URLs for modpack manifest and external mods
 - Backend calls Verifier to verify modpack signature

@@ -124,7 +124,7 @@ async fn install_fabriclike(
         .header(
             "User-Agent",
             format!(
-                "Paigaldaja/{} (+https://github.com/Fabulously-Optimized/vanilla-installer-rust)",
+                "OptiFine-for-Fabric-Installer/{} (+https://modrinth.com/modpack/optifine-for-fabric)",
                 app_handle.package_info().version
             ),
         )
@@ -286,7 +286,7 @@ async fn try_download(
         .header(
             "User-Agent",
             format!(
-                "Paigaldaja/{} (+https://github.com/Fabulously-Optimized/vanilla-installer-rust)",
+                "OptiFine-for-Fabric-Installer/{} (+https://modrinth.com/modpack/optifine-for-fabric)",
                 app_handle.package_info().version
             ),
         )
@@ -376,7 +376,7 @@ async fn install_mrpack_inner(
         .header(
             "User-Agent",
             format!(
-                "Paigaldaja/{} (+https://github.com/Fabulously-Optimized/vanilla-installer-rust)",
+                "OptiFine-for-Fabric-Installer/{} (+https://modrinth.com/modpack/optifine-for-fabric)",
                 app_handle.package_info().version
             ),
         )
@@ -399,7 +399,7 @@ async fn install_mrpack_inner(
         .header(
             "User-Agent",
             format!(
-                "Paigaldaja/{} (+https://github.com/Fabulously-Optimized/vanilla-installer-rust)",
+                "OptiFine-for-Fabric-Installer/{} (+https://modrinth.com/modpack/optifine-for-fabric)",
                 app_handle.package_info().version
             ),
         )

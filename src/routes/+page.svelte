@@ -25,7 +25,7 @@
 		ListboxOption
 	} from '@rgossiaux/svelte-headlessui';
 
-	const PROJECT_ID = '1KVo5zza';
+	const PROJECT_ID = 'BHtwz1lb';
 	let totalMods = Infinity;
 
 	listen('install:progress', (event) => {
@@ -87,13 +87,13 @@
 		try {
 			const version = versions!.find((e) => e.id == selected)!;
 			const url = version!.files.find((e) => e.primary)!.url;
-			const cosign_bundle_url = version!.files.find((e) => e.filename == 'cosign-bundle.zip')!.url;
+			const cosign_bundle_url = version!.files.find((e) => e.filename == 'cosign-bundle.zip')?.url || '';
 			const mc_version = version?.game_versions[0];
 			const profile_dir =
 				profileDirectory != ''
 					? profileDirectory
 					: isolateProfile
-					? `fabulously-optimized-${mc_version}`
+					? `optifine-for-fabric-${mc_version}`
 					: undefined;
 			if (state != 'confirmDowngrade') {
 				const installed_metadata = await get_installed_metadata(profile_dir);
@@ -118,12 +118,12 @@
 			const icon = await fetch(project.icon_url!);
 			await install_mrpack(
 				url,
-				isolateProfile ? `fabulously-optimized-${mc_version}` : 'fabulously-optimized',
+				isolateProfile ? `optifine-for-fabric-${mc_version}` : 'optifine-for-fabric',
 				await icon.blob(),
-				isolateProfile ? `Fabulously Optimized ${mc_version}` : 'Fabulously Optimized',
+				isolateProfile ? `OptiFine for Fabric ${mc_version}` : 'OptiFine for Fabric',
 				profile_dir,
 				{
-					fo_version: {
+					off_version: {
 						id: version.id,
 						version_number: version.version_number
 					},
@@ -147,8 +147,7 @@
 	let isolateProfile = false;
 	list_versions(PROJECT_ID).then((result) => {
 		const featured_versions = result
-			.filter((e) => e.featured)
-			.filter((e) => e.files.find((e) => e.filename == 'cosign-bundle.zip'));
+			.filter((e) => e.featured);
 		const release_versions = featured_versions.filter((e) => e.version_type == 'release');
 		versions = featured_versions;
 		if (release_versions.length > 0) {
@@ -196,7 +195,7 @@
 	}
 
 	function openHelp() {
-		open('https://wiki.download.fo/version-support');
+		open('https://modrinth.com/modpack/optifine-for-fabric/versions');
 	}
 
 	async function browseProfileDirectory() {
