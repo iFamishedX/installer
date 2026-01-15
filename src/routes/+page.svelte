@@ -85,10 +85,20 @@
 			}
 		});
 		try {
-			const version = versions!.find((e) => e.id == selected)!;
-			const url = version!.files.find((e) => e.primary)!.url;
-			const cosign_bundle_url = version!.files.find((e) => e.filename == 'cosign-bundle.zip')?.url || '';
-			const mc_version = version?.game_versions[0];
+			const version = versions?.find((e) => e.id == selected);
+			if (!version) {
+				throw new Error('Selected version not found');
+			}
+			const primaryFile = version.files.find((e) => e.primary);
+			if (!primaryFile) {
+				throw new Error('No primary file found for selected version');
+			}
+			const url = primaryFile.url;
+			const cosign_bundle_url = version.files.find((e) => e.filename == 'cosign-bundle.zip')?.url || '';
+			const mc_version = version.game_versions?.[0];
+			if (!mc_version) {
+				throw new Error('No Minecraft version found for selected version');
+			}
 			const profile_dir =
 				profileDirectory != ''
 					? profileDirectory
@@ -115,11 +125,17 @@
 			}
 			state = 'installing';
 			const project = await get_project(PROJECT_ID);
-			const icon = await fetch(project.icon_url!);
+			let iconBlob: Blob | undefined;
+			if (project.icon_url) {
+				const iconResponse = await fetch(project.icon_url);
+				if (iconResponse.ok) {
+					iconBlob = await iconResponse.blob();
+				}
+			}
 			await install_mrpack(
 				url,
 				isolateProfile ? `optifine-for-fabric-${mc_version}` : 'optifine-for-fabric',
-				await icon.blob(),
+				iconBlob,
 				isolateProfile ? `OptiFine for Fabric ${mc_version}` : 'OptiFine for Fabric',
 				profile_dir,
 				{
@@ -146,8 +162,13 @@
 	let selected: string;
 	let isolateProfile = false;
 	list_versions(PROJECT_ID).then((result) => {
-		const featured_versions = result
-			.filter((e) => e.featured);
+		const featured_versions = result.filter((e) => e.featured);
+		if (featured_versions.length === 0) {
+			console.error('No featured versions found');
+			state = 'error';
+			errorMessage = 'No versions available for installation';
+			return;
+		}
 		const release_versions = featured_versions.filter((e) => e.version_type == 'release');
 		versions = featured_versions;
 		if (release_versions.length > 0) {
@@ -155,6 +176,10 @@
 		} else {
 			selected = featured_versions[0].id;
 		}
+	}).catch((e) => {
+		console.error('Failed to load versions:', e);
+		state = 'error';
+		errorMessage = String(e);
 	});
 	let state:
 		| 'preInstall'

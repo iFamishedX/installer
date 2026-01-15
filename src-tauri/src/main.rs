@@ -478,9 +478,9 @@ async fn install_mrpack_inner(
             "install:progress",
             ("download_file", "start", i, &file.path),
         );
-        let path = parse_and_sanitize_path(&file.path)
+        let relative_path = parse_and_sanitize_path(&file.path)
             .ok_or(anyhow!("Possibly malicious download path: {}", file.path))?;
-        let path = profile_base_path.join(path);
+        let path = profile_base_path.join(relative_path);
         if let Some(env) = file.env {
             if let Some(&mrpack::SideType::Unsupported) = env.get(&mrpack::EnvType::Client) {
                 continue;
@@ -495,7 +495,7 @@ async fn install_mrpack_inner(
                 ))?,
         )?;
         if let Some(parent) = path.parent() {
-            tokio::fs::create_dir_all(profile_base_path.join(parent)).await?;
+            tokio::fs::create_dir_all(parent).await?;
         }
         let mut success = false;
         let mut last_err = None;
@@ -511,7 +511,7 @@ async fn install_mrpack_inner(
             .await
             {
                 Ok(()) => {
-                    written_files.push(path.to_owned());
+                    written_files.push(relative_path.to_owned());
                     success = true;
                     break;
                 }
@@ -524,7 +524,7 @@ async fn install_mrpack_inner(
             return Err(anyhow!(
                 "Download failed for {}: {}",
                 file.path,
-                last_err.unwrap()
+                last_err.unwrap_or_else(|| anyhow!("Unknown error"))
             ));
         }
         let _ = app_handle.emit_all(

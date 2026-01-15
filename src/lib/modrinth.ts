@@ -26,6 +26,9 @@ export async function get_project(id: string): Promise<Project> {
 			'User-Agent': `OptiFine-for-Fabric-Installer/${await getVersion()} (+https://modrinth.com/modpack/optifine-for-fabric)`
 		}
 	});
+	if (!resp.ok) {
+		throw new Error(`Failed to fetch project: ${resp.status} ${resp.statusText}`);
+	}
 	return await resp.json();
 }
 
@@ -35,5 +38,8 @@ export async function list_versions(id: string): Promise<Version[]> {
 			'User-Agent': `OptiFine-for-Fabric-Installer/${await getVersion()} (+https://modrinth.com/modpack/optifine-for-fabric)`
 		}
 	});
+	if (!resp.ok) {
+		throw new Error(`Failed to fetch versions: ${resp.status} ${resp.statusText}`);
+	}
 	return await resp.json();
 }
