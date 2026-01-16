@@ -1,23 +1,27 @@
-name: Unsigned Build
+name: Build and Release
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
+    tags:
+      - 'v*'
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      # Build Go verifier
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-      - run: go build -o dist/verifier-x86_64-pc-windows-msvc.exe main.go
+      - name: Build verifier
+        run: go build -o dist/verifier-x86_64-pc-windows-msvc.exe main.go
         working-directory: verifier
 
+      # Build frontend with pnpm
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -26,16 +30,43 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 9
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+      - name: Install frontend deps
+        run: pnpm install --frozen-lockfile
+      - name: Build frontend
+        run: pnpm build
 
+      # Build Rust/Tauri installer
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-      - run: cargo build --release
+      - name: Build installer
+        run: cargo build --release
         working-directory: src-tauri
 
-      - name: Upload unsigned artifact
+      # Rename binary to desired release name
+      - name: Rename binary
+        run: |
+          mv "src-tauri/target/release/paigaldaja.exe" \
+             "src-tauri/target/release/OptiFine for Fabric installer.exe"
+
+      # Upload artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-installer
-          path: src-tauri/target/release/paigaldaja.exe
+          name: optifine-fabric-installer
+          path: "src-tauri/target/release/OptiFine for Fabric installer.exe"
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: optifine-fabric-installer
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "OptiFine for Fabric installer.exe"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
