@@ -42,15 +42,21 @@ jobs:
         run: cargo build --release
         working-directory: src-tauri
 
-      # Debug: list files in release folder
-      - name: List release folder
-        run: dir "src-tauri/target/release"
-
-      # Rename binary to desired release name
-      - name: Rename binary
+      # Detect and rename the built exe dynamically
+      - name: Detect and rename binary
         run: |
-          mv "src-tauri/target/release/paigaldaja.exe" \
-             "src-tauri/target/release/OptiFine for Fabric installer.exe"
+          cd src-tauri/target/release
+          echo "Listing files before rename:"
+          dir
+          for %%f in (*.exe) do (
+            echo "Found binary: %%f"
+            ren "%%f" "OptiFine for Fabric installer.exe"
+            echo "Renamed %%f -> OptiFine for Fabric installer.exe"
+            goto :done
+          )
+          :done
+          echo "Listing files after rename:"
+          dir
 
       # Upload artifact
       - name: Upload artifact
