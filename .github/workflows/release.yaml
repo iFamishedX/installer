@@ -9,19 +9,15 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Build Go verifier
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-      - name: Build verifier
-        run: go build -o dist/verifier-x86_64-pc-windows-msvc.exe main.go
+      - run: go build -o dist/verifier-x86_64-pc-windows-msvc.exe main.go
         working-directory: verifier
 
-      # Build frontend with pnpm
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -30,35 +26,28 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 9
-      - name: Install frontend deps
-        run: pnpm install --frozen-lockfile
-      - name: Build frontend
-        run: pnpm build
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
 
-      # Build Rust/Tauri installer
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-      - name: Build installer
-        run: cargo build --release
+      - run: cargo build --release
         working-directory: src-tauri
 
-      # Detect and rename the built exe dynamically
       - name: Detect and rename binary
+        shell: cmd
         run: |
-          cd src-tauri/target/release
-          echo "Listing files before rename:"
+          cd src-tauri\target\release
           dir
           for %%f in (*.exe) do (
-            echo "Found binary: %%f"
+            echo Found binary: %%f
             ren "%%f" "OptiFine for Fabric installer.exe"
-            echo "Renamed %%f -> OptiFine for Fabric installer.exe"
+            echo Renamed %%f -> OptiFine for Fabric installer.exe
             goto :done
           )
           :done
-          echo "Listing files after rename:"
           dir
 
-      # Upload artifact
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -69,13 +58,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: optifine-fabric-installer
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
           files: "OptiFine for Fabric installer.exe"
         env:
