@@ -13,12 +13,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build verifier
+        run: |
+          go build -o dist/verifier-x86_64-pc-windows-msvc.exe main.go
+        working-directory: verifier
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Build in release mode
+      - name: Build installer
         run: cargo build --release
-        working-directory: src-tauri   # 👈 point to where Cargo.toml lives
+        working-directory: src-tauri
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
