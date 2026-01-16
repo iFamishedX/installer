@@ -40,10 +40,17 @@ jobs:
       - name: Build frontend
         run: pnpm build
 
-      # Build the Rust/Tauri installer
+      # Install Rust
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      # Detect binary name from Cargo.toml
+      - name: Detect binary name
+        id: cargo-meta
+        run: |
+          echo "BIN_NAME=$(cargo metadata --no-deps --format-version=1 --manifest-path src-tauri/Cargo.toml | jq -r '.packages[0].name')" >> $GITHUB_ENV
+
+      # Build the Rust/Tauri installer
       - name: Build installer
         run: cargo build --release
         working-directory: src-tauri
@@ -52,7 +59,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: installer-exe
-          path: src-tauri/target/release/installer.exe
+          path: src-tauri/target/release/${{ env.BIN_NAME }}.exe
 
   release:
     needs: build
@@ -66,6 +73,6 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: installer.exe
+          files: ${{ env.BIN_NAME }}.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
