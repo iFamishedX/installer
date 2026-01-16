@@ -13,16 +13,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Build the Go verifier
       - name: Install Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
 
       - name: Build verifier
-        run: |
-          go build -o dist/verifier-x86_64-pc-windows-msvc.exe main.go
+        run: go build -o dist/verifier-x86_64-pc-windows-msvc.exe main.go
         working-directory: verifier
 
+      # Build the frontend (creates ../build folder for Tauri)
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend deps
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      # Build the Rust/Tauri installer
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
