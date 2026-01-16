@@ -42,6 +42,10 @@ jobs:
         run: cargo build --release
         working-directory: src-tauri
 
+      # Debug: list files in release folder
+      - name: List release folder
+        run: dir "src-tauri/target/release"
+
       # Rename binary to desired release name
       - name: Rename binary
         run: |
