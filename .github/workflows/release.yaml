@@ -1,78 +1,41 @@
-name: Build and Release
+name: Unsigned Build
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [ main ]
+  pull_request:
 
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Build the Go verifier
-      - name: Install Go
+      - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-
-      - name: Build verifier
-        run: go build -o dist/verifier-x86_64-pc-windows-msvc.exe main.go
+      - run: go build -o dist/verifier-x86_64-pc-windows-msvc.exe main.go
         working-directory: verifier
 
-      # Build the frontend with pnpm
-      - name: Install Node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Install pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 9
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
 
-      - name: Install frontend deps
-        run: pnpm install --frozen-lockfile
-
-      - name: Build frontend
-        run: pnpm build
-
-      # Install Rust
-      - name: Install Rust
+      - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-
-      # Detect binary name from Cargo.toml
-      - name: Detect binary name
-        id: cargo-meta
-        run: |
-          echo "BIN_NAME=$(cargo metadata --no-deps --format-version=1 --manifest-path src-tauri/Cargo.toml | jq -r '.packages[0].name')" >> $GITHUB_ENV
-
-      # Build the Rust/Tauri installer
-      - name: Build installer
-        run: cargo build --release
+      - run: cargo build --release
         working-directory: src-tauri
 
-      - name: Upload artifact
+      - name: Upload unsigned artifact
         uses: actions/upload-artifact@v4
         with:
-          name: installer-exe
-          path: src-tauri/target/release/${{ env.BIN_NAME }}.exe
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: installer-exe
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ env.BIN_NAME }}.exe
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: unsigned-installer
+          path: src-tauri/target/release/paigaldaja.exe
