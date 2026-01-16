@@ -23,17 +23,22 @@ jobs:
         run: go build -o dist/verifier-x86_64-pc-windows-msvc.exe main.go
         working-directory: verifier
 
-      # Build the frontend (creates ../build folder for Tauri)
+      # Build the frontend with pnpm
       - name: Install Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
       - name: Install frontend deps
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build frontend
-        run: npm run build
+        run: pnpm build
 
       # Build the Rust/Tauri installer
       - name: Install Rust
